@@ -68,8 +68,17 @@ const MainPage = memo(({ navigation }) => {
   const onFindHospital = useCallback(() => {
     navigation.navigate(ROUTES.FindHospital);
   }, [navigation]);
+
   const Symptoms = useCallback(() => {
     navigation.navigate(ROUTES.Symptoms);
+  }, [navigation]);
+
+  const ListPhysiotherapy = useCallback(() => {
+    navigation.navigate(ROUTES.ListPhysiotherapy);
+  }, [navigation]);
+
+  const ListDietitician = useCallback(() => {
+    navigation.navigate(ROUTES.ListDietitician);
   }, [navigation]);
 
   const onAppointment = useCallback(() => {
@@ -154,7 +163,7 @@ const MainPage = memo(({ navigation }) => {
           />
           <ServiceItem
             // onPress={onAppointment}
-            onPress={Symptoms}
+            onPress={ListPhysiotherapy}
             svg={
               <Image
                 style={styles.imgCategories}
@@ -167,7 +176,7 @@ const MainPage = memo(({ navigation }) => {
           <ServiceItem
             // onPress={onPriceServices}
             // onPress={onAppointment}
-            onPress={Symptoms}
+            onPress={ListDietitician}
             svg={
               <Image
                 style={styles.imgCategories}

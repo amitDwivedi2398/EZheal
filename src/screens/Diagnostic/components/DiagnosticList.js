@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { ScaledSheet } from 'react-native-size-matters';
 import colors from '@ultis/colors';
@@ -14,6 +14,7 @@ import { ScrollView } from 'react-native-gesture-handler';
 import Cart from '@screens/Cart';
 import { useNavigation } from '@react-navigation/native';
 import ROUTES from '@ultis/routes';
+import axios from 'axios';
 
 interface Props {
   logoHospital?: any;
@@ -46,18 +47,38 @@ const DiagnosticList = memo((props: Props) => {
     navigation.navigate(ROUTES.LabList);
   }, [navigation]);
 
+  const [test,setTest] = useState([])
+
+  const getTest = async () => {
+    axios.get(`https://ezheal.ai/api/ApiCommonController/testlist`)
+      .then(response => {
+        //console.log(response.data.data)
+        const test = response.data.data;
+        setTest(test);
+        console.log(test);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+  useEffect(() => {
+    getTest();
+
+  }, []);
+
   return (
+    
     <View style={styles.container}>
+      
       <ScrollView>
+      {test?.map((pcr) =>(
         <View
-          style={{
-            backgroundColor: colors.white,
-          }}>
+          style={styles.main}>
           <View style={styles.topView}>
             {/* {logoHospital} */}
-            <Text style={styles.txtInsurance}>{testName}</Text>
+            <Text style={styles.txtInsurance}>{pcr.test_name}</Text>
           </View>
-          <Text style={styles.txtName}>{name}</Text>
+          <Text style={styles.txtName}>{pcr.description}</Text>
           <Text style={styles.txtName}>{titleName}</Text>
           <View style={styles.btmView}>
             <View
@@ -67,7 +88,7 @@ const DiagnosticList = memo((props: Props) => {
                 alignItems: 'center',
               }}>
               <Text style={styles.price}>Price:</Text>
-              <Text style={styles.txtEnrolleeID}>{price}</Text>
+              <Text style={styles.txtEnrolleeID}>{pcr.price}</Text>
             </View>
             <View>
               {/* <Text style={styles.expDate}>Date</Text>
@@ -83,35 +104,10 @@ const DiagnosticList = memo((props: Props) => {
           <SvgAdd />
         </TouchableOpacity> */}
         </View>
-        <View style={styles.secondGrid}>
-          <View style={styles.topView}>
-            {/* {logoHospital} */}
-            <Text style={styles.txtInsurance}>{testName}</Text>
-          </View>
-          <Text style={styles.txtName}>{name}</Text>
-          <Text style={styles.txtName}>{titleName}</Text>
-          <View style={styles.btmView}>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}>
-              <Text style={styles.price}>Price:</Text>
-              <Text style={styles.txtEnrolleeID}>{price}</Text>
-            </View>
-            <View>
-              {/* <Text style={styles.expDate}>Date</Text>
-          <Text style={styles.txtExpDate}>{expDate}</Text> */}
-              <ButtonPrimary
-                 onPress={LabList}
-                title={'ADD'}
-                style={styles.buttonPrimary}
-              />
-            </View>
-          </View>
-        </View>
+        ))}
+        
       </ScrollView>
+      
     </View>
   );
 });
@@ -119,12 +115,8 @@ export default DiagnosticList;
 
 const styles = ScaledSheet.create({
   container: {
-    paddingTop: scaleHeight(20),
-    // paddingHorizontal: scaleWidth(24),
     borderRadius: scaleWidth(15),
     marginHorizontal: scaleWidth(5),
-    marginBottom: scaleHeight(16),
-    paddingBottom: scaleHeight(22),
     width: scaleWidth(180),
     flexDirection: 'column',
   },
@@ -135,12 +127,11 @@ const styles = ScaledSheet.create({
     color: colors.semiBlack,
     fontWeight: '500',
     marginLeft: scaleWidth(12),
-    marginTop: scaleHeight(4),
     textTransform: 'uppercase',
   },
   topView: {
     alignItems: 'center',
-    marginBottom: scaleHeight(24),
+    marginBottom: scaleHeight(20),
   },
   txtName: {
     fontFamily: FONTS.HIND.Regular,
@@ -209,10 +200,15 @@ const styles = ScaledSheet.create({
     width: scaleWidth(140),
     height: scaleHeight(40),
     alignSelf: 'center',
-    marginBottom: getBottomSpace() + scaleHeight(8),
+    marginBottom: getBottomSpace() + scaleHeight(15),
   },
   secondGrid: {
     marginTop: scaleHeight(12),
     backgroundColor: colors.white,
   },
+  main:{
+    backgroundColor: colors.white,
+    marginBottom: scaleHeight(10),
+  paddingTop: scaleHeight(22),
+  }
 });

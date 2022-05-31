@@ -11,6 +11,7 @@ import SvgAspirin from '@svgs/ListDrugs/SvgAspirin';
 import ROUTES from '@ultis/routes';
 import SvgPsychologit from '@svgs/Symptoms/SvgPsychologit';
 import SvgNutritionist from '@svgs/Symptoms/SvgNutritionist';
+import SymptomsList from './components/SymptomsList';
 
 const LISTDRUGSDATA = [
   {
@@ -100,7 +101,7 @@ const Symptoms = memo(({ navigation }) => {
       const { Svg, drugName, concentration } = item;
 
       return (
-        <DrugItem
+        <SymptomsList
           Svg={Svg}
           drugName={drugName}
           concentration={concentration}

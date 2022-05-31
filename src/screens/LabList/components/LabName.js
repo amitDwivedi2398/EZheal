@@ -1,5 +1,5 @@
-import React, { memo, useCallback } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import React, { memo, useCallback, useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity,ScrollView } from 'react-native';
 import { ScaledSheet } from 'react-native-size-matters';
 import colors from '@ultis/colors';
 import { scaleHeight, scaleWidth } from '@ultis/size';
@@ -8,6 +8,7 @@ import SvgArrowRight from '@svgs/Insurance/SvgArrowRight';
 import Cart from '@screens/Cart';
 import { useNavigation } from '@react-navigation/native';
 import ROUTES from '@ultis/routes';
+import axios from 'axios';
 
 interface Props {
   logoHospital?: any;
@@ -38,28 +39,53 @@ const LabName = memo((props: Props) => {
     navigation.navigate(ROUTES.Cart);
   }, [navigation]);
 
+  const [lab,setLab] = useState([])
+
+  const getLab = async () => {
+    axios.get(`https://ezheal.ai/api/ApiCommonController/getdiegnostic`)
+      .then(response => {
+        //console.log(response.data.data)
+        const lab = response.data.data;
+        setLab(lab);
+        console.log(lab);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+  useEffect(() => {
+    getLab();
+
+  }, []);
+
   return (
     <View style={styles.container}>
+      <ScrollView>
+      {lab?.map((labName) =>(
+        <View style={styles.main}>
       <View style={styles.topView}>
         {logoHospital}
-        <Text style={styles.txtInsurance}>{insurance}</Text>
+        <Text style={styles.txtInsurance}>{labName.name}</Text>
       </View>
       <Text style={styles.txtName}>{name}</Text>
-      <Text style={styles.txtprice}>{price}</Text>
-      <Text style={styles.txtAddresh}>{addresh}</Text>
+      <Text style={styles.txtprice}>{labName.price}</Text>
+      <Text style={styles.txtAddresh}>{labName.address}</Text>
       <View style={styles.btmView}>
         <View>
           <Text style={styles.enrolleeID}>Order ID</Text>
           <Text style={styles.txtEnrolleeID}>{enrolleeID}</Text>
         </View>
-        <View>
+        <View style={styles.space}>
           <Text style={styles.expDate}>Date</Text>
-          <Text style={styles.txtExpDate}>{expDate}</Text>
+          <Text style={styles.txtExpDate}>{labName.create_date}</Text>
         </View>
       </View>
       <TouchableOpacity onPress={Cart} style={styles.viewButton}>
         <SvgArrowRight />
       </TouchableOpacity>
+      </View>
+      ))}
+      </ScrollView>
     </View>
   );
 });
@@ -74,6 +100,9 @@ const styles = ScaledSheet.create({
     marginHorizontal: scaleWidth(16),
     marginBottom: scaleHeight(16),
     paddingBottom: scaleHeight(18),
+  },
+  main:{
+    marginBottom: scaleHeight(16),
   },
   txtInsurance: {
     fontFamily: FONTS.HIND.Regular,
@@ -90,6 +119,7 @@ const styles = ScaledSheet.create({
     alignItems: 'center',
     marginBottom: scaleHeight(24),
   },
+
   txtName: {
     fontFamily: FONTS.HIND.Regular,
     fontSize: scaleHeight(32),
@@ -153,7 +183,7 @@ const styles = ScaledSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     position: 'absolute',
-    top: scaleHeight(16),
-    right: scaleWidth(24),
+    top: scaleHeight(1),
+    right: scaleWidth(2),
   },
 });

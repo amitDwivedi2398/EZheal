@@ -88,6 +88,8 @@ import LabList from '@screens/LabList/LabList';
 import BloodPressure from '@screens/BloodPressure/BloodPressure';
 import Prescription from '@screens/Prescription/Prescription';
 import Checkout from '@screens/PayBill';
+import ListPhysiotherapy from '@screens/Physiotherapy';
+import ListDietitician from '@screens/Dietitician';
 
 const Main = memo(() => {
   return (
@@ -627,6 +629,24 @@ const Main = memo(() => {
           component={LabList}
           options={({}) => ({
             headerTitle: () => <HeaderTitle title={'Lab List'} />,
+            headerLeft: () => <ButtonHeader left={true} />,
+            headerBackground: () => <HeaderBackGround />,
+          })}
+        />
+        <Stack.Screen
+          name={ROUTES.ListPhysiotherapy}
+          component={ListPhysiotherapy}
+          options={({}) => ({
+            headerTitle: () => <HeaderTitle title={'Physiotherapy'} />,
+            headerLeft: () => <ButtonHeader left={true} />,
+            headerBackground: () => <HeaderBackGround />,
+          })}
+        />
+        <Stack.Screen
+          name={ROUTES.ListDietitician}
+          component={ListDietitician}
+          options={({}) => ({
+            headerTitle: () => <HeaderTitle title={'Dietitician'} />,
             headerLeft: () => <ButtonHeader left={true} />,
             headerBackground: () => <HeaderBackGround />,
           })}

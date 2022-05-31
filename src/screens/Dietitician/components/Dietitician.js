@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, TouchableOpacity, View, Image } from 'react-native';
 import { ScaledSheet } from 'react-native-size-matters';
 import colors from '@ultis/colors';
@@ -6,8 +6,6 @@ import { scaleHeight, scaleWidth } from '@ultis/size';
 import SvgRightArrow from '@svgs/SvgRightArrow';
 import FONTS from '@ultis/fonts';
 import axios from 'axios';
-import ROUTES from '@ultis/routes';
-import { useNavigation } from '@react-navigation/native';
 
 
 // interface Props {
@@ -17,16 +15,12 @@ import { useNavigation } from '@react-navigation/native';
 //   onPress?: any;
 // }
 
-const SymptomsList = () => {
-  const navigation = useNavigation();
-  const onFindDoctor = useCallback(() => {
-    navigation.navigate(ROUTES.FindDoctors);
-  }, [navigation]);
+const Dietitician = () => {
 
   const [categories, setCategories] = useState([]);
 
   const getCategories = async () => {
-    axios.get(`https://ezheal.ai/api/ApiCommonController/getdoctorrequest`)
+    axios.get(`https://ezheal.ai/api/ApiCommonController/getdietician`)
       .then(response => {
         //console.log(response.data.data)
         const categories = response.data.data;
@@ -45,7 +39,6 @@ const SymptomsList = () => {
     <View>
       {categories?.map((cat) => (
         <TouchableOpacity
-        onPress={onFindDoctor}
           activeOpacity={0.6}
           style={styles.container} key={cat.id}>
           <Image source={{ uri: `${cat.image}` }} style={styles.image}/>      
@@ -60,7 +53,7 @@ const SymptomsList = () => {
   )
 }
 
-export default SymptomsList;
+export default Dietitician;
 
 const styles = ScaledSheet.create({
   container: {

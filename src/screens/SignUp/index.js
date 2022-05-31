@@ -24,38 +24,38 @@ const SignUp = memo(({ navigation }) => {
   const [mobile_no, setMobile] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rePassword, setRepassword] = useState('');
+  const [repassword, setRepassword] = useState('');
 
-  const _storeData = async token => {
+  const _storeData = async user_id => {
     try {
-      await AsyncStorage.setItem('user-token', token);
-      console.log('token saved success');
+      await AsyncStorage.setItem('user_id', user_id);
+      console.log('user_id saved success');
     } catch (error) {
-      console.log('Some error in setting token');
+      console.log('Some error in setting user_id');
     }
   };
-  const register = (name,mobile_no, email, password, rePassword) => {
-    console.log(name,mobile_no, email, password, rePassword);
+  const register = (name,mobile_no, email, password, repassword) => {
+    console.log(name,mobile_no, email, password, repassword);
     axios
       .post(`https://ezheal.ai/api/ApiCommonController/userRegister`, {
         name: name,
         mobile_no: mobile_no,
         email: email,
         password: password,
-        repassword: rePassword,
+        repassword: repassword,
       })
-      .then(function(response) {
-        console.log(response.data);
+       .then(function(response) {
+       console.log(response.data);
         // if (response.data.msg === 'success' || response.data.msg == 'success') {
         //   ToastAndroid.show('Register Successfull....', ToastAndroid.SHORT);
         // }
         // console.log(response.data);
 
-        // if (response.data.token != null) {
-        //   _storeData(response.data.token);
+        // if (response.data.user_id != null) {
+        //   _storeData(response.data.user_id);
         //   navigation.navigate('Home');
         // } else {
-        //   console.log('no token!');
+        //   console.log('no user_id!');
         // }
       })
       .catch(function (error) {
@@ -122,12 +122,12 @@ const SignUp = memo(({ navigation }) => {
             svg={<SvgLock />}
             placeholder={'Re-Password'}
             secure={true}
-            value={rePassword}
+            value={repassword}
             onChangeText={setRepassword}
           />
           <ButtonPrimary
           onPress={() => {
-            register(name,mobile_no, email, password, rePassword);
+            register(name,mobile_no, email, password, repassword);
           }}
             style={styles.signUp}
             title={'Sign Up'}

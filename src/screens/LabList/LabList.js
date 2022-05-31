@@ -5,21 +5,10 @@ import colors from '@ultis/colors';
 import SvgLogo from '@svgs/Insurance/SvgLogo';
 import { scaleHeight, scaleWidth } from '@ultis/size';
 import keyExtractor from '@ultis/keyExtractor';
-import InsuranceItem from '@screens/Insurance/components/InsuranceItem';
-import { getBottomSpace } from 'react-native-iphone-x-helper';
 import LabName from './components/LabName';
 import { Searchbar } from 'react-native-paper';
 
 const INSURANCEDATA = [
-  {
-    logoHospital: <SvgLogo />,
-    insurance: 'Lab Name',
-    name: 'Test Name',
-    price: '₹500',
-    addresh: '80,Behind C21 Mall, Scheme 54 PU4,Indore',
-    enrolleeID: 'VMH9231458760',
-    expDate: '16-2025',
-  },
   {
     logoHospital: <SvgLogo />,
     insurance: 'Lab Name',
@@ -34,6 +23,7 @@ const INSURANCEDATA = [
 const LabList = memo(() => {
   const [insuranceData, setInsuranceData] = useState(INSURANCEDATA);
 
+  
   const renderItem = useCallback(({ item }) => {
     const {
       logoHospital,
