@@ -1,4 +1,4 @@
-import React, { memo, useState, useCallback } from 'react';
+import React, { memo, useState, useCallback, useEffect } from 'react';
 import { View, Text, ScrollView, Image,TouchableOpacity } from 'react-native';
 import { ScaledSheet } from 'react-native-size-matters';
 import colors from '@ultis/colors';
@@ -30,6 +30,7 @@ import ListDrugs from '@screens/ListDrugs';
 import SymptomsList from '@screens/Symptoms/components/SymptomsList';
 import ChatBot from '@screens/ChatBot';
 import GroupChat from '@screens/SocialBot';
+import axios from 'axios';
 const TOPICDATA = [
   {
     color: colors.green,
@@ -115,11 +116,77 @@ const MainPage = memo(({ navigation }) => {
     });
   };
 
+  const [medical, setMedical] = useState([]);
+  const [category, setCategory] = useState([]);
+  const [benar, setBenar] = useState([]);
+
+  const getCategory = async () => {
+    axios.get(`https://ezheal.ai/api/ApiCommonController/getcategorylist1`)
+      .then(response => {
+        //console.log(response.data.data)
+        const category = response.data.data;
+        setCategory(category);
+        console.log(category);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+  useEffect(() => {
+    getCategory();
+
+  }, []);
+
+  const getMedical = async () => {
+    axios.get(`https://ezheal.ai/api/ApiCommonController/getpharmacy`)
+      .then(response => {
+        //console.log(response.data.data)
+        const medical = response.data.data;
+        setMedical(medical);
+        console.log(medical);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+  useEffect(() => {
+    getMedical();
+
+  }, []);
+
+  const getBenar = async () => {
+    axios.get(`https://ezheal.ai/api/ApiCommonController/getpatientbanner`)
+      .then(response => {
+        //console.log(response.data.data)
+        const benar = response.data.data;
+        setBenar(benar);
+        console.log(benar);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+  useEffect(() => {
+    getBenar();
+
+  }, []);
+
+
+
   return (
     <View style={styles.container}>
+     
       <ScrollView
+      
         contentContainerStyle={styles.contentStyle}
         showsVerticalScrollIndicator={false}>
+          <ScrollView horizontal={true} >
+          <View style={styles.topic}>
+           {benar?.map((ben) =>
+          <Image style={styles.topicItem} source={{ uri: `${ben.image}` }} />
+     )}
+     </View>
+          </ScrollView>
         <View style={styles.location}>
           <TouchableOpacity onPress={MapsDoctors} >
           <SvgLocation style={styles.img} />
@@ -237,11 +304,13 @@ const MainPage = memo(({ navigation }) => {
           <Text style={styles.patient}>Category</Text>
           <View style={styles.flexWrap1}>
             <ScrollView horizontal={true}>
-              <Category svg={<SvgBlood />} title={'Back Pain'} />
-              <Category svg={<SvgBlood />} title={'Blood Pressure'} />
+              {category?.map((cati)=>
+              <Category svg={<Image style={styles.svgimg}  source={{ uri: `${cati.image}` }} />} title={cati.name} />
+              )}
+              {/* <Category svg={<SvgBlood />} title={'Blood Pressure'} />
               <Category svg={<SvgBlood />} title={'Chest Chekup'} />
               <Category svg={<SvgBlood />} title={'Hair Fall'} />
-              <Category svg={<SvgBlood />} title={'Head Ache'} />
+              <Category svg={<SvgBlood />} title={'Head Ache'} /> */}
             </ScrollView>
           </View>
         </View>
@@ -249,36 +318,20 @@ const MainPage = memo(({ navigation }) => {
           <Text style={styles.patient1}>Medical Shop</Text>
           <View style={styles.flexWrap2}>
             <ScrollView horizontal={true}>
+              {medical?.map((medi) =>
               <TouchableOpacity>
                 <Card style={styles.card}>
-                  <Image
+                  {/* <Image
                     style={styles.imgMedical}
                     source={require('../../assets/MainPage/medical.png')}
-                  />
+                  /> */}
+                  <Image style={styles.imgMedical} source={{ uri: `${medi.shop_image}` }} />
                   <Card.Actions></Card.Actions>
-                  <Button>Medi World</Button>
+                  <Button>{medi.store_name}</Button>
                 </Card>
               </TouchableOpacity>
-              <TouchableOpacity>
-                <Card style={styles.card}>
-                  <Image
-                    style={styles.imgMedical}
-                    source={require('../../assets/MainPage/medical.png')}
-                  />
-                  <Card.Actions></Card.Actions>
-                  <Button>Medi World</Button>
-                </Card>
-              </TouchableOpacity>
-              <TouchableOpacity>
-                <Card style={styles.card}>
-                  <Image
-                    style={styles.imgMedical}
-                    source={require('../../assets/MainPage/medical.png')}
-                  />
-                  <Card.Actions></Card.Actions>
-                  <Button>Medi World</Button>
-                </Card>
-              </TouchableOpacity>
+              )}
+              
             </ScrollView>
           </View>
         </View>
@@ -401,4 +454,28 @@ const styles = ScaledSheet.create({
     width: 60,
     height: 59,
   },
+  svgimg:{
+      width: scaleWidth(48),
+      height: scaleWidth(48),
+      borderRadius: scaleWidth(16),
+      backgroundColor: colors.frame,
+      marginTop: scaleHeight(14),
+      marginBottom: scaleHeight(39),
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    topicItem: {
+      width: scaleWidth(280),
+      height: scaleHeight(150),
+      marginRight: scaleWidth(16),
+      borderRadius: scaleWidth(16),
+      overflow: 'hidden',
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+    },
+    topic:{
+      flexDirection:'row',
+      justifyContent:'center'
+      
+    }
 });

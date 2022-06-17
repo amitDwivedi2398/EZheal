@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ import SvgStar from '@svgs/AppointmentList/SvgStar';
 import ButtonPrimary from '@components/ButtonPrimary';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import SvgDelete from '@svgs/SvgDelete';
+import axios from 'axios';
 
 interface PropsDoctorItem {
   style?: ViewStyle;
@@ -73,24 +74,45 @@ const DoctorItem = (props: PropsDoctorItem) => {
     );
   };
 
+  const [doctor, setDoctor] = useState([]);
+
+  const getDoctors = async () => {
+    axios.get(`https://ezheal.ai/api/ApiCommonController/getdoctorrequest`)
+      .then(response => {
+        //console.log(response.data.data)
+        const doctor = response.data.data;
+        setDoctor(doctor);
+        console.log(doctor);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+  useEffect(() => {
+    getDoctors();
+
+  }, []);
+
   return (
     <Swipeable
       friction={2}
       rightThreshold={40}
       renderRightActions={activeRemove ? renderRightActions : null}>
+        {doctor?.map((doc) => (
       <TouchableOpacity
         onPress={onPress}
         activeOpacity={0.6}
         style={[styles.doctorItem, style]}>
-        <Image style={styles.imgDoctor} source={imgDoctor} />
+        {/* <Image style={styles.imgDoctor} source={imgDoctor} /> */}
+        <Image source={{ uri: `${doc.image}` }} style={styles.imgDoctor}/>
         <View style={styles.rateView}>
-          <Text style={styles.txtDoctorName}>{doctorName}</Text>
+          <Text style={styles.txtDoctorName}>{doc.name}</Text>
           <View style={styles.setRow}>
             <SvgStar style={styles.svgStart} />
             <Text style={styles.txtRating}>{rating}</Text>
           </View>
         </View>
-        <Text style={styles.txtSpecialized}>{specialized}</Text>
+        <Text style={styles.txtSpecialized}>{doc.specialztion}</Text>
         <TouchableOpacity
           onPress={onLocation}
           activeOpacity={0.6}
@@ -113,6 +135,7 @@ const DoctorItem = (props: PropsDoctorItem) => {
           />
         </View>
       </TouchableOpacity>
+        ))}
     </Swipeable>
   );
 };

@@ -13,10 +13,12 @@ interface PropsTopicItem {
 
 const TopicItem = (props: PropsTopicItem) => {
   return (
-    <View style={[styles.topicItem, { backgroundColor: props.color }]}>
-      <View style={styles.svg}>{props.svg}</View>
-      <Text style={styles.txtTitle}>{props.title}</Text>
-    </View>
+   <>
+   </>
+    // <View style={[styles.topicItem, { backgroundColor: props.color }]}>
+    //   {/* <View style={styles.svg}>{props.svg}</View>
+    //   <Text style={styles.txtTitle}>{props.title}</Text> */}
+    // </View>
   );
 };
 export default TopicItem;

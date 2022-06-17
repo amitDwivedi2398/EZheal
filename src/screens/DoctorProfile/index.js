@@ -1,4 +1,4 @@
-import React, { memo, useState, useCallback } from 'react';
+import React, { memo, useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -24,6 +24,7 @@ import TopicItem from '@components/TopicItem';
 import SvgDoctor from '@svgs/MainPage/SvgDoctor';
 import SvgLocation from '@svgs/SvgLocation';
 import ROUTES from '@ultis/routes';
+import axios from 'axios';
 
 const DOCTOR_DATA = {
   imgDoctor: require('@assets/DoctorProfile/Doctor.png'),
@@ -72,6 +73,26 @@ const DoctorProfile = memo(({ navigation }) => {
       return <DoctorServiceItem key={index} title={item} />;
     });
   }, [doctorData.doctorServices]);
+
+
+  const [doctor, setDoctor] = useState([]);
+
+  const getDoctorList = async () => {
+    axios.get(`https://ezheal.ai/api/ApiCommonController/doctorlist`)
+      .then(response => {
+        //console.log(response.data.data)
+        const doctor = response.data.data;
+        setDoctor(doctor);
+        console.log(doctor);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+  useEffect(() => {
+    getDoctorList();
+
+  }, []);
 
   return (
     <ScrollView style={styles.container}>
@@ -133,6 +154,7 @@ const DoctorProfile = memo(({ navigation }) => {
         title={`Reviewer (${doctorData.reviewer})`}
         onPress={onDoctorReview}
       />
+      
     </ScrollView>
   );
 });

@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { ScaledSheet } from 'react-native-size-matters';
 import colors from '@ultis/colors';
@@ -14,6 +14,8 @@ import TimeBookItem from '@screens/BookAppointment/Components/TimeBookItem';
 import SvgDoctorImg from '@svgs/BookAppointment/SvgDoctorImg';
 import { getBottomSpace } from 'react-native-iphone-x-helper';
 import BookingStatus from '@screens/AppointmentStutas/BookingStatus';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DATA = {
   imgDoctor: require('@assets/BookAppointment/Doctor.png'),
@@ -22,12 +24,23 @@ const DATA = {
 
 const TIMEBOOKDATA = ['10:00 AM', '11:30 AM', '13:20 AM'];
 
-const BookAppointment = memo(({ navigation }) => {
-  const date = moment().format();
+const BookAppointment = memo(({ route, navigation }) => {
+  const { id } = route.params;
+  const dates = moment().format();
   const [bookAppointmentData, setBookAppointmentData] = useState(DATA);
   const [bookTimeData, setBookTimeData] = useState(TIMEBOOKDATA);
-  const [dateSelect, setDateSelect] = useState(date);
+  const [dateSelect, setDateSelect] = useState(dates);
   const [active, setActive] = useState(1);
+  const [oneDoctor, setOneDoctor] = useState({})
+
+
+  const [date, setDate] = useState(new Date());
+  const changeSelectedDate = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setDate(currentDate);
+  };
+
+
 
   const onChoose = useCallback((index) => {
     setActive(index);
@@ -41,14 +54,15 @@ const BookAppointment = memo(({ navigation }) => {
     navigation.navigate(ROUTES.DoctorMessage);
   }, [navigation]);
 
-  const BookingStatus = useCallback(() => {
-    navigation.navigate(ROUTES.BookingStatus);
-  }, [navigation]);
   const Checkout = useCallback(() => {
     navigation.navigate(ROUTES.Checkout);
   }, [navigation]);
 
-  const onBookNow = useCallback(() => {}, []);
+  const BookingStatus = useCallback(() => {
+    navigation.navigate(ROUTES.BookingStatus);
+  }, [navigation]);
+
+  const onBookNow = useCallback(() => { }, []);
 
   const markedDay = {
     [dateSelect.dateString]: {
@@ -92,6 +106,47 @@ const BookAppointment = memo(({ navigation }) => {
   };
   LocaleConfig.defaultLocale = 'en';
 
+  const getOneDoctor = async () => {
+    axios.get(`https://ezheal.ai/api/ApiCommonController/doctorlistbyid/${id}`)
+      .then(response => {
+        //console.log(response.data.data)
+        const oneDoctor = response.data.data;
+        setOneDoctor(oneDoctor)
+        console.log('@@@@', oneDoctor)
+      }).catch(error => {
+        console.log(error)
+      })
+  }
+  useEffect(() => {
+    getOneDoctor()
+  }, []);
+
+
+  //  const [date,setDate] = useState('');
+    const [time,setTime] = useState('');
+
+
+
+  const appointment = async () => {
+    console.log("$$$",date,time);
+    axios
+      .post(`https://ezheal.ai/api/ApiCommonController/doctorappointment`, {
+      date:date,
+      time:time,
+      },{
+        headers:{
+          "user_token": await AsyncStorage.getItem("user_token")
+        }
+      })
+       .then(response => {
+       console.log('@@',response.data);       
+      })
+      .catch(error => {
+        console.log(error.response.data);
+      });
+  };
+
+
   return (
     <ScrollView
       contentContainerStyle={styles.contentContainerStyle}
@@ -114,12 +169,17 @@ const BookAppointment = memo(({ navigation }) => {
           <SvgMessage />
         </TouchableOpacity>
       </View>
-      <Text style={styles.doctorName}>{bookAppointmentData.doctorName}</Text>
+      <Text style={styles.doctorName}>{oneDoctor?.clinician_name}</Text>
       <Calendar
         style={styles.calendarView}
         firstDay={1}
+        testID="dateTimePicker"
+        value={date}
+        is24Hour={true}
+        display="default"
+        onChange={changeSelectedDate}
         startFromMonday={true}
-        current={date}
+        current={dates}
         headerStyle={styles.headerStyle}
         markedDates={markedDay}
         onDayPress={(dateChose) => setDateSelect(dateChose)}
@@ -140,7 +200,7 @@ const BookAppointment = memo(({ navigation }) => {
             },
           },
           calendarBackground: colors.white,
-          selectedDayBackgroundColor: colors.blueAccent,
+          selectedDayBackgroundColor: colors.blue,
           textDayFontFamily: FONTS.HIND.Regular,
           textDayFontSize: scaleHeight(12),
           textMonthFontFamily: FONTS.HIND.Regular,
@@ -150,13 +210,20 @@ const BookAppointment = memo(({ navigation }) => {
           textDayHeaderFontSize: scaleHeight(12),
           monthTextColor: colors.white,
           dayTextColor: colors.black2,
-          todayTextColor: colors.blueAccent,
+          todayTextColor: colors.blue,
           textDisabledColor: '#C8C8C8',
           selectedDayTextColor: colors.white,
         }}
       />
       <View style={styles.timeView}>
-        {bookTimeData.map((item, index) => {
+      <TouchableOpacity
+      value={time}
+      onChangeText={setTime}
+      activeOpacity={0.6}
+      style={styles.timetab}>
+      <Text style={styles.txtTime}>'10:00 AM'</Text>
+    </TouchableOpacity>
+        {/* {bookTimeData.map((item, index) => {
           return (
             <TimeBookItem
               active={active}
@@ -164,15 +231,26 @@ const BookAppointment = memo(({ navigation }) => {
               key={index}
               id={index}
               time={item}
+              value={time}
+              onChangeText={setTime}
             />
           );
-        })}
+        })} */}
       </View>
-      <ButtonPrimary
+      <TouchableOpacity
         style={styles.buttonPrimary}
-        onPress={Checkout}
+        onPress={() => {
+          appointment(time, date);
+        }}>
+        <Text style={styles.txt}>
+          Submit
+        </Text>
+      </TouchableOpacity>
+      {/* <ButtonPrimary
+        style={styles.buttonPrimary}
+        onPress={appointment}
         title={'Book Now'}
-      />
+      /> */}
     </ScrollView>
   );
 });
@@ -231,13 +309,26 @@ const styles = ScaledSheet.create({
     overflow: 'hidden',
   },
   headerStyle: {
-    backgroundColor: colors.blueAccent,
+    backgroundColor: colors.blue,
     marginHorizontal: scaleWidth(-6),
   },
   buttonPrimary: {
     width: scaleWidth(295),
-    alignSelf: 'center',
-    marginTop: scaleHeight(24),
+    height: scaleHeight(48),
+    backgroundColor: colors.classicBlue,
+    marginTop: scaleHeight(25),
+    justifyContent: 'center',
+    shadowOpacity: 10,
+    elevation: 10,
+    borderRadius: scaleHeight(24),
+    alignSelf: 'center'
+  },
+  txt: {
+    fontFamily: FONTS.HIND.Bold,
+    fontSize: scaleHeight(16),
+    textTransform: 'uppercase',
+    color: colors.white,
+    alignSelf: 'center'
   },
   timeView: {
     flexDirection: 'row',
@@ -246,5 +337,21 @@ const styles = ScaledSheet.create({
   },
   contentContainerStyle: {
     paddingBottom: getBottomSpace() + scaleHeight(24),
+  },
+  timetab:{
+    paddingHorizontal: scaleHeight(20),
+    paddingTop: scaleHeight(12),
+    paddingBottom: scaleHeight(10),
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: scaleWidth(16),
+    borderRadius: scaleWidth(8),
+    width: scaleWidth(104),
+    backgroundColor:colors.blue
+  },
+  txtTime: {
+    fontFamily: FONTS.HIND.Regular,
+    fontSize: scaleHeight(16),
+    lineHeight: scaleHeight(24),
   },
 });

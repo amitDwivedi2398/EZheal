@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, Keyboard, Platform,Image } from 'react-native';
+import { View, Text, TouchableOpacity, Keyboard, Platform,Image,TextInput,ToastAndroid } from 'react-native';
 import { ScaledSheet } from 'react-native-size-matters';
 import colors from '@ultis/colors';
 import SvgHeart from '@svgs/SignIn/SvgHeart';
@@ -15,13 +15,22 @@ import { scaleHeight, scaleWidth } from '@ultis/size';
 import { getBottomSpace } from 'react-native-iphone-x-helper';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { getStatusBarHeight } from '@ultis/StatusBar';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SignIn = memo(({ navigation }) => {
-  const [userName, setUserName] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [storeddata, setStoreddata] = useState('');
   const [show, setShow] = useState(true);
   const refInput1 = useRef(null);
   const refInput2 = useRef(null);
+
+ 
+
+  function showToast() {
+    ToastAndroid.show('Wrong Email or Password', ToastAndroid.SHORT);
+  }
 
   const onSignUp = useCallback(() => {
     navigation.navigate(ROUTES.SignUp);
@@ -58,6 +67,64 @@ const SignIn = memo(({ navigation }) => {
   const keyboardDidHide = () => {
     setShow(true);
   };
+  // logIn api//
+  const _storeData = async token => {
+    try {
+      await AsyncStorage.setItem('token', JSON.stringify(token));
+      console.log('token saved success');
+    } catch (error) {
+      console.log('Some error in setting token');
+    }
+  };
+  const getData = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (token !== null) {
+        console.log('success');
+        console.log(token);
+        setStoreddata(token);
+        navigation.replace('CreatAccount',{ screen: 'CreatAccount' })
+      }
+    } catch (e) {
+      console.log('no Value in login');
+    }
+  };
+  useEffect(() => {
+    getData();
+  }, [storeddata]);
+
+  const postUser = () =>{
+    axios.post("https://ezheal.ai/api/ApiCommonController/patient_loginbypassword",{
+          email:email,
+          password:password
+    })
+    .then(function(response){
+      console.log(response.data);
+      console.log(response.data);
+      if (response.data.msg === 'success' || response.data.msg == 'success') {
+        ToastAndroid.show('Login Successfull....', ToastAndroid.SHORT);
+      }
+      console.log(response.data);
+
+         if (response.data != null) {
+          _storeData(response.data);
+          
+          navigation.replace('MainBottomTab',{ screen: 'MainPage' })
+        } else {
+          console.log('no data!');  
+        }
+    })
+    .catch(function(error){
+      console.log("error",error);
+      if (
+        error.response.data.msg == 'User Doesnot Exist' ||
+        error.response.data.msg === 'User Doesnot Exist'
+      ) {
+        showToast();
+      }
+    });
+  };
+  
 
   return (
     <View style={styles.container}>
@@ -67,7 +134,7 @@ const SignIn = memo(({ navigation }) => {
           <Image style={styles.svgHeart} source={require('../../assets/logo/ezheal_icon.png')} />
         {/* <SvgHeart style={styles.svgHeart} /> */}
         <Text style={styles.txtWelcome}>Welcome to EZscan</Text>
-        <TextInputHealer
+        {/* <TextInputHealer
           inputRef={refInput1}
           svg={<SvgUser />}
           placeholder={'Username/Phonenumber'}
@@ -77,21 +144,56 @@ const SignIn = memo(({ navigation }) => {
             refInput2.current.focus();
           }}
           blurOnSubmit={false}
+        /> */}
+        <TextInput
+        inputRef={refInput1}
+        style={styles.txtInput2}
+        svg={<SvgUser />}
+        placeholder={'Email'}
+        value={email} 
+        blurOnSubmit={false}
+        onChangeText={setEmail}
         />
-        <TextInputHealer
+         
+        {/* <TextInputHealer
           inputRef={refInput2}
           style={styles.txtInput2}
           svg={<SvgLock />}
           placeholder={'Password'}
           secure={true}
           value={password}
+        /> */}
+        <TextInput 
+        inputRef={refInput2}
+        style={styles.txtInput2}
+        svg={<SvgLock />}
+        placeholder={'Password'}
+        secure={true}
+        value={password}
+        onChangeText={setPassword}
         />
+        
         <View style={styles.signInView}>
-          <ButtonPrimary
-            onPress={onCreateAccount}
+        <TouchableOpacity
+            style={styles.signIn}
+            onPress={() => {
+              postUser(email, password);
+            }}>
+            <Text style={styles.txt}>
+              Submit
+            </Text>
+          </TouchableOpacity>
+          <View>
+          {/* <Text>
+            {storeddata}
+            <storeddata />
+          </Text> */}
+        </View>
+          {/* <ButtonPrimary
+            onPress={postUser}
             style={styles.signIn}
             title={'Sign In'}
-          />
+          /> */}
           <TouchableOpacity style={styles.viewFaceId}>
             <SvgFaceID />
           </TouchableOpacity>
@@ -155,13 +257,38 @@ const styles = ScaledSheet.create({
     marginBottom: scaleHeight(30),
   },
   txtInput2: {
-    marginTop: scaleHeight(16),
-    marginBottom: scaleHeight(24),
+    marginTop: scaleHeight(25),
+    flex: 1,
+    height: '100%',
+    width: '100%',
+    marginLeft: scaleWidth(16),
+    fontFamily: FONTS.HIND.Regular,
+    fontSize: scaleHeight(14),
+    color: colors.semiBlack,
+    width: scaleWidth(295),
+    height: scaleHeight(48),
+    backgroundColor: colors.frame,
+    borderRadius: scaleHeight(24),
+    alignSelf: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
   },
   signIn: {
     width: scaleWidth(221),
     height: scaleHeight(48),
     backgroundColor: colors.classicBlue,
+    marginTop: scaleHeight(25),
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowOpacity: 10,
+    elevation: 10,
+    borderRadius:scaleHeight(24) ,
+  },
+  txt:{
+    fontFamily: FONTS.HIND.Bold,
+    fontSize: scaleHeight(16),
+    textTransform: 'uppercase',
+    color: colors.white,
   },
   viewFaceId: {
     width: scaleWidth(48),
@@ -170,6 +297,7 @@ const styles = ScaledSheet.create({
     backgroundColor: colors.secondBlue,
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: scaleHeight(25),
   },
   signInView: {
     flexDirection: 'row',

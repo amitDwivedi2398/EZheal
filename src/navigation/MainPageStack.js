@@ -15,7 +15,7 @@ import SvgCart from '@svgs/Cart/SvgCart';
 
 const Stack = createStackNavigator();
 
-const MainPageStack = memo(() => {
+const MainPageStack = memo(({navigation}) => {
   return (
     <Stack.Navigator>
       <Stack.Screen

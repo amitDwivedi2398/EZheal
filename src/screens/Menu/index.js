@@ -17,6 +17,10 @@ import SvgHoverLine from '@svgs/Menu/SvgHoverLine';
 import { getStatusBarHeight } from 'react-native-iphone-x-helper';
 import SvgFakeScreens from '@svgs/Menu/SvgFakeScreens';
 import SvgAvatar from '@svgs/Menu/SvgAvatar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NavigationActions } from 'react-navigation';
+import SignIn from '@screens/SignIn';
+
 
 const SCREENS = [
   'Home',
@@ -35,7 +39,7 @@ const SCREENS = [
   'Privacy Policy',
   'Terms & Conditions',
   'Contact Us',
-  'Log out',
+  // 'Log out',
 ];
 
 const DATAUSER = {
@@ -60,6 +64,11 @@ const Menu = memo(({ route }) => {
     switch (key) {
       case 'Home':
         navigation.navigate(ROUTES.MainPage);
+        setIndex(0);
+        break;
+
+      case 'SignIn':
+        navigation.replace(ROUTES.SignIn);
         setIndex(0);
         break;
       case 'My Order':
@@ -128,9 +137,9 @@ const Menu = memo(({ route }) => {
       //   navigation.navigate(ROUTES.News);
       //   setIndex(6);
       //   break;
-      case 'Log out':
-        navigation.navigate(ROUTES.SignIn);
-        break;
+      // case 'Log out':
+      //   navigation.navigate(ROUTES.SignIn);
+      //   break;
     }
   };
 
@@ -162,7 +171,26 @@ const Menu = memo(({ route }) => {
             </Text>
           </TouchableOpacity>
         );
+       
       })}
+       <TouchableOpacity style={styles.btn}
+        onPress={async () => {
+         
+          // navigation.replace('Login');
+          
+          await AsyncStorage.removeItem('token');
+          navigation.reset({
+            index: 0,
+            actions: [
+              // NavigationActions.navigate({ routeName: 'ScreenName' })
+              navigation.replace(ROUTES.SignIn)
+            ]
+          });
+          console.log('>>>>>>>>>>>');
+        }}
+       >
+          <Text style={styles.txt}>Log out</Text>
+        </TouchableOpacity>
       <SvgFakeScreens style={styles.svgFakeScreens} />
     </ScrollView>
   );

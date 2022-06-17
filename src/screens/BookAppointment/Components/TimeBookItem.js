@@ -14,8 +14,8 @@ interface Props {
 
 const TimeBookItem = (props: Props) => {
   const { id, time, active, onChoose } = props;
-  const backgroundColor = active === id ? colors.blueAccent : colors.white;
-  const textColor = active === id ? colors.white : colors.semiBlack;
+  const backgroundColor = active === id ? colors.blueAccent : colors.blue;
+  const textColor = active === id ? colors.blue : colors.semiBlack;
 
   const onPress = useCallback(() => {
     onChoose(id);

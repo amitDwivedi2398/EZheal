@@ -1,55 +1,38 @@
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { moderateScale, scale } from 'react-native-size-matters';
+import axios from 'axios';
 
 export default function TermsConditions() {
+
+  const [terms, setTerms] = useState([]);
+
+  const getTerm = async () => {
+    axios.get(`https://ezheal.ai/api/ApiCommonController/termcondition`)
+      .then(response => {
+        //console.log(response.data.data)
+        const terms = response.data.data;
+        setTerms(terms);
+        console.log(terms);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+  useEffect(() => {
+    getTerm();
+
+  }, []);
   return (
     <ScrollView style={styles.container}>
+      {terms?.map((ter) =>(
       <View style={{ flex: 1 }}>
-        <Text style={styles.heding}>Terms & Conditions</Text>
+        <Text style={styles.heding}>{ter.title}</Text>
         <Text style={styles.heding2}>
-          Lorem Ipsum is simply dummy text of the printing and typesetting
-          industry. Lorem Ipsum has been the industry's standard dummy text ever
-          since the 1500s, when an unknown printer took a galley of type and
-          scrambled it to make a type specimen book. It has survived not only
-          five centuries,
-        </Text>
-        <Text style={styles.heding2}>
-          Lorem Ipsum is simply dummy text of the printing and typesetting
-          industry. Lorem Ipsum has been the industry's standard dummy text ever
-          since the 1500s, when an unknown printer took a galley of type and
-          scrambled it to make a type specimen book. It has survived not only
-          five centuries,
-        </Text>
-        <Text style={styles.heding2}>
-          Lorem Ipsum is simply dummy text of the printing and typesetting
-          industry. Lorem Ipsum has been the industry's standard dummy text ever
-          since the 1500s, when an unknown printer took a galley of type and
-          scrambled it to make a type specimen book. It has survived not only
-          five centuries,
-        </Text>
-        <Text style={styles.heding2}>
-          Lorem Ipsum is simply dummy text of the printing and typesetting
-          industry. Lorem Ipsum has been the industry's standard dummy text ever
-          since the 1500s, when an unknown printer took a galley of type and
-          scrambled it to make a type specimen book. It has survived not only
-          five centuries,
-        </Text>
-        <Text style={styles.heding2}>
-          Lorem Ipsum is simply dummy text of the printing and typesetting
-          industry. Lorem Ipsum has been the industry's standard dummy text ever
-          since the 1500s, when an unknown printer took a galley of type and
-          scrambled it to make a type specimen book. It has survived not only
-          five centuries,
-        </Text>
-        <Text style={styles.heding2}>
-          Lorem Ipsum is simply dummy text of the printing and typesetting
-          industry. Lorem Ipsum has been the industry's standard dummy text ever
-          since the 1500s, when an unknown printer took a galley of type and
-          scrambled it to make a type specimen book. It has survived not only
-          five centuries,
+          {ter.editor1}
         </Text>
       </View>
+      ))}
     </ScrollView>
   );
 }

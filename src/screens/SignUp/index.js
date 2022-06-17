@@ -1,5 +1,5 @@
 import React, { memo, useState, useCallback } from 'react';
-import { View, Text, Platform,Image } from 'react-native';
+import { View, Text, Platform,Image,TextInput } from 'react-native';
 import { ScaledSheet } from 'react-native-size-matters';
 import colors from '@ultis/colors';
 import { getHeightByPercent, scaleHeight, scaleWidth } from '@ultis/size';
@@ -18,6 +18,8 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { getStatusBarHeight } from '@ultis/StatusBar';
 import { widthScreen } from '@ultis/dimensions';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 
 const SignUp = memo(({ navigation }) => {
   const [name, setName] = useState('');
@@ -26,15 +28,15 @@ const SignUp = memo(({ navigation }) => {
   const [password, setPassword] = useState('');
   const [repassword, setRepassword] = useState('');
 
-  const _storeData = async user_id => {
+  const _storeData = async token => {
     try {
-      await AsyncStorage.setItem('user_id', user_id);
+      await AsyncStorage.setItem('user_token', JSON.stringify(token));
       console.log('user_id saved success');
     } catch (error) {
       console.log('Some error in setting user_id');
     }
   };
-  const register = (name,mobile_no, email, password, repassword) => {
+  const register = () => {
     console.log(name,mobile_no, email, password, repassword);
     axios
       .post(`https://ezheal.ai/api/ApiCommonController/userRegister`, {
@@ -45,24 +47,30 @@ const SignUp = memo(({ navigation }) => {
         repassword: repassword,
       })
        .then(function(response) {
-       console.log(response.data);
+       console.log('@@',response.data.data.token);
+       console.log('$$',response.data.data);
         // if (response.data.msg === 'success' || response.data.msg == 'success') {
         //   ToastAndroid.show('Register Successfull....', ToastAndroid.SHORT);
         // }
         // console.log(response.data);
 
-        // if (response.data.user_id != null) {
-        //   _storeData(response.data.user_id);
-        //   navigation.navigate('Home');
-        // } else {
-        //   console.log('no user_id!');
-        // }
+        if (response.data.data.token != null) {
+          _storeData(response.data.data.token);
+          navigation.navigate('CreatAccount',{ screen: 'CreatAccount' })
+        } else {
+          console.log('no data!');
+        }
       })
       .catch(function (error) {
         console.log(error);
       });
   };
 
+ 
+
+  const onCreateAccount = useCallback(() => {
+    navigation.navigate(ROUTES.CreatAccount);
+  }, [navigation]);
 
   const onSignIn = useCallback(() => {
     navigation.navigate(ROUTES.SignIn);
@@ -72,8 +80,8 @@ const SignUp = memo(({ navigation }) => {
   //   navigation.navigate(ROUTES.SignIn);
   // }, [navigation]);
 
-  const onFaceBook = useCallback(() => {}, []);
-  const onGoogle = useCallback(() => {}, []);
+  // const onFaceBook = useCallback(() => {}, []);
+  // const onGoogle = useCallback(() => {}, []);
 
   return (
     <View style={styles.container}>
@@ -88,47 +96,87 @@ const SignUp = memo(({ navigation }) => {
         <View style={[styles.contentView]}>
           <Text style={styles.txtJoin}>Join to EZscan!</Text>
           {/* <Text style={styles.txtVacation}>Vacation Home Rental Success</Text> */}
-          <TextInputHealer
+          {/* <TextInputHealer
             style={styles.txtInput1}
             svg={<SvgUser />}
             placeholder={'Username'}
             value={name}
             onChangeText={setName}
-          />
-          <TextInputHealer
+          /> */}
+          <TextInput
+           style={styles.txtInput1}
+           placeholder={'Username'}
+           value={name}
+           onChangeText={setName}
+           placeholderTextColor={colors.dimGray}
+           />
+          {/* <TextInputHealer
             style={styles.txtInput1}
             svg={<SvgUser />}
             placeholder={'Mobile'}
             value={mobile_no}
             onChangeText={setMobile}
-          />
-          <TextInputHealer
+          /> */}
+          <TextInput
+          style={styles.txtInput1}
+          svg={<SvgUser />}
+          placeholder={'Mobile'}
+          value={mobile_no}
+          onChangeText={setMobile}
+          placeholderTextColor={colors.dimGray}
+           />
+
+          {/* <TextInputHealer
             style={styles.txtInput2}
             svg={<SvgEmail />}
             placeholder={'Email'}
             value={email}
             onChangeText={setEmail}
+          /> */}
+          <TextInput 
+          style={styles.txtInput1}
+            svg={<SvgEmail />}
+            placeholder={'Email'}
+            value={email}
+            onChangeText={setEmail}
+            placeholderTextColor={colors.dimGray}
           />
-          <TextInputHealer
+          {/* <TextInputHealer
             style={styles.txtInput2}
             svg={<SvgLock />}
             placeholder={'Password'}
             secure={true}
             value={password}
             onChangeText={setPassword}
+          /> */}
+          <TextInput 
+           style={styles.txtInput1}
+           svg={<SvgLock />}
+           placeholder={'Password'}
+           secure={true}
+           value={password}
+           onChangeText={setPassword}
+           placeholderTextColor={colors.dimGray}
           />
-          <TextInputHealer
+          {/* <TextInputHealer
             style={styles.txtInput2}
             svg={<SvgLock />}
             placeholder={'Re-Password'}
             secure={true}
             value={repassword}
             onChangeText={setRepassword}
-          />
+          /> */}
+          <TextInput 
+           style={styles.txtInput1}
+           svg={<SvgLock />}
+           placeholder={'Re-Password'}
+           placeholderTextColor={colors.dimGray}
+           secure={true}
+           value={repassword}
+           onChangeText={setRepassword}/>
+
           <ButtonPrimary
-          onPress={() => {
-            register(name,mobile_no, email, password, repassword);
-          }}
+          onPress={register}
             style={styles.signUp}
             title={'Sign Up'}
           />
@@ -138,17 +186,19 @@ const SignUp = memo(({ navigation }) => {
             <Text style={styles.txtOr}>or</Text>
             <SvgLine />
           </View>
-          <Text onPress={onSignIn} style={styles.signIn}>
+          <Text 
+          // onPress={onSignIn} 
+          style={styles.signIn}>
             Sign In
           </Text>
           <View style={styles.bottomView}>
             <ButtonPrimary
-              onPress={onFaceBook}
+              // onPress={onFaceBook}
               style={styles.facebook}
               title={'Facebook'}
             />
             <ButtonPrimary
-              onPress={onGoogle}
+              // onPress={onGoogle}
               style={styles.google}
               title={'Google'}
             />
@@ -215,6 +265,20 @@ const styles = ScaledSheet.create({
   },
   txtInput1: {
     marginTop: scaleHeight(27),
+    flex: 1,
+    height: '100%',
+    width: '100%',
+    marginLeft: scaleWidth(16),
+    fontFamily: FONTS.HIND.Regular,
+    fontSize: scaleHeight(14),
+    color: colors.semiBlack,
+    width: scaleWidth(295),
+    height: scaleHeight(48),
+    backgroundColor: colors.frame,
+    borderRadius: scaleHeight(24),
+    alignSelf: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
   },
   txtInput2: {
     marginTop: scaleHeight(16),

@@ -15,7 +15,7 @@ const FullName = memo(() => {
     navigation.navigate(ROUTES.Gender);
   }, [navigation]);
 
-  const [fullName, setFullName] = useState('No13design');
+  const [fullName, setFullName] = useState('');
 
   return (
     <KeyboardAwareScrollView bounces={false} style={styles.container}>

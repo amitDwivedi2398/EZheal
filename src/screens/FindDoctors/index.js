@@ -1,4 +1,4 @@
-import React, { memo, useState, useCallback } from 'react';
+import React, { memo, useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -25,6 +25,9 @@ import SvgDoctor from '@svgs/MainPage/SvgDoctor';
 import SvgLocation from '@svgs/SvgLocation';
 import ROUTES from '@ultis/routes';
 import { Searchbar } from 'react-native-paper';
+import axios from 'axios';
+import { navigationRef } from '@navigation/NavigationService';
+import { useNavigation } from '@react-navigation/native';
 
 const DOCTOR_DATA = {
   imgDoctor: require('@assets/DoctorProfile/Doctor.png'),
@@ -39,7 +42,6 @@ const DOCTOR_DATA = {
 
 const FindDoctors = memo(({ navigation }) => {
   const [doctorData, setDoctorData] = useState(DOCTOR_DATA);
-
   const onGoBack = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
@@ -74,25 +76,50 @@ const FindDoctors = memo(({ navigation }) => {
     });
   }, [doctorData.doctorServices]);
 
+
+  const [doctor, setDoctor] = useState([]);
+
+  const getDoctorList = async () => {
+    axios.get(`https://ezheal.ai/api/ApiCommonController/doctorlist`)
+      .then(response => {
+        //console.log(response.data.data)
+        const doctor = response.data.data;
+        setDoctor(doctor);
+        console.log(doctor);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+  useEffect(() => {
+    getDoctorList();
+
+  }, []);
+
   return (
     <ScrollView style={styles.container}>
       <Searchbar style={styles.btnSearch} placeholder="Search" />
+      {doctor?.map((doc) =>
       <View style={styles.headerView}>
         <View style={styles.header}>
           <View style={styles.setRow}>
-            <Text style={styles.doctorName}>{doctorData.doctorName}</Text>
+            <Text style={styles.doctorName}>{doc.clinician_name}</Text>
             <View style={styles.rateView}>
-              <Text style={styles.specialized}>{doctorData.specialized}</Text>
+              <Text style={styles.specialized}>{doc.specializaition}</Text>
               <SvgStar style={styles.svgStart} />
               <Text style={styles.txtRating}>{doctorData.rating}</Text>
             </View>
-            <Text style={styles.txtTitle}>{doctorData.title}</Text>
+            <Text style={styles.txtTitle}>{doc.description}</Text>
           </View>
-          <Image style={styles.imgDoctor} source={doctorData.imgDoctor} />
+          <Image style={styles.imgDoctor} source={{ uri: `${doc.pimage}` }} /> 
+          {/* <Image style={styles.imgDoctor} source={doctorData.imgDoctor} /> */}
         </View>
         <View style={styles.buttonsView}>
           <ButtonPrimary
-            onPress={onBookAppoitnment}
+            // onPress={onBookAppoitnment}
+            onPress={() =>
+               navigation.navigate('BookAppointment', {id: doc.id})
+              }
             style={styles.buttonPrimary}
             title={'Book Appoitnment'}
             titleStyle={styles.txtBtn}
@@ -108,100 +135,7 @@ const FindDoctors = memo(({ navigation }) => {
           <SvgBackArrow color={colors.semiBlack} />
         </TouchableOpacity> */}
       </View>
-
-      <View style={styles.headerView}>
-        <View style={styles.header}>
-          <View style={styles.setRow}>
-            <Text style={styles.doctorName}>{doctorData.doctorName}</Text>
-            <View style={styles.rateView}>
-              <Text style={styles.specialized}>{doctorData.specialized}</Text>
-              <SvgStar style={styles.svgStart} />
-              <Text style={styles.txtRating}>{doctorData.rating}</Text>
-            </View>
-            <Text style={styles.txtTitle}>{doctorData.title}</Text>
-          </View>
-          <Image style={styles.imgDoctor} source={doctorData.imgDoctor} />
-        </View>
-        <View style={styles.buttonsView}>
-          <ButtonPrimary
-            onPress={onBookAppoitnment}
-            style={styles.buttonPrimary}
-            title={'Book Appoitnment'}
-            titleStyle={styles.txtBtn}
-          />
-          <TouchableOpacity onPress={onVideoCall} style={styles.svgVideo}>
-            <SvgVideo />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={onMessage} style={styles.svgMessage}>
-            <SvgMessage />
-          </TouchableOpacity>
-        </View>
-        {/* <TouchableOpacity onPress={onGoBack} style={styles.svgBackArrow}>
-          <SvgBackArrow color={colors.semiBlack} />
-        </TouchableOpacity> */}
-      </View>
-      <View style={styles.headerView}>
-        <View style={styles.header}>
-          <View style={styles.setRow}>
-            <Text style={styles.doctorName}>{doctorData.doctorName}</Text>
-            <View style={styles.rateView}>
-              <Text style={styles.specialized}>{doctorData.specialized}</Text>
-              <SvgStar style={styles.svgStart} />
-              <Text style={styles.txtRating}>{doctorData.rating}</Text>
-            </View>
-            <Text style={styles.txtTitle}>{doctorData.title}</Text>
-          </View>
-          <Image style={styles.imgDoctor} source={doctorData.imgDoctor} />
-        </View>
-        <View style={styles.buttonsView}>
-          <ButtonPrimary
-            onPress={onBookAppoitnment}
-            style={styles.buttonPrimary}
-            title={'Book Appoitnment'}
-            titleStyle={styles.txtBtn}
-          />
-          <TouchableOpacity onPress={onVideoCall} style={styles.svgVideo}>
-            <SvgVideo />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={onMessage} style={styles.svgMessage}>
-            <SvgMessage />
-          </TouchableOpacity>
-        </View>
-        {/* <TouchableOpacity onPress={onGoBack} style={styles.svgBackArrow}>
-          <SvgBackArrow color={colors.semiBlack} />
-        </TouchableOpacity> */}
-      </View>
-      <View style={styles.headerView}>
-        <View style={styles.header}>
-          <View style={styles.setRow}>
-            <Text style={styles.doctorName}>{doctorData.doctorName}</Text>
-            <View style={styles.rateView}>
-              <Text style={styles.specialized}>{doctorData.specialized}</Text>
-              <SvgStar style={styles.svgStart} />
-              <Text style={styles.txtRating}>{doctorData.rating}</Text>
-            </View>
-            <Text style={styles.txtTitle}>{doctorData.title}</Text>
-          </View>
-          <Image style={styles.imgDoctor} source={doctorData.imgDoctor} />
-        </View>
-        <View style={styles.buttonsView}>
-          <ButtonPrimary
-            onPress={onBookAppoitnment}
-            style={styles.buttonPrimary}
-            title={'Book Appoitnment'}
-            titleStyle={styles.txtBtn}
-          />
-          <TouchableOpacity onPress={onVideoCall} style={styles.svgVideo}>
-            <SvgVideo />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={onMessage} style={styles.svgMessage}>
-            <SvgMessage />
-          </TouchableOpacity>
-        </View>
-        {/* <TouchableOpacity onPress={onGoBack} style={styles.svgBackArrow}>
-          <SvgBackArrow color={colors.semiBlack} />
-        </TouchableOpacity> */}
-      </View>
+      )}
       {/* <View style={styles.doctorServices}>
         <View style={styles.topView}>
           <View style={styles.flexDirection}>
