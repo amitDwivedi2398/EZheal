@@ -28,47 +28,45 @@ const DoctorReviewItem = memo((props: Props) => {
     order,
   } = props;
 
-  const [booking, setBooking] = useState([]);
+  const [booking, setBooking] = useState({});
 
   const getBooking = async () => {
     axios
-      .get(`https://ezheal.ai/api/ApiCommonController/appointmentlist`,{
-        headers:{
-          'user_id': await AsyncStorage.getItem('user_id'),
-        }
+      .get(`https://ezheal.ai/api/ApiCommonController/appointmentlist1/20`, {
+        headers: {
+          user_token: await AsyncStorage.getItem('user_token'),
+        },
       })
-      .then(response => {
-        const booking = response.datadata.booking_Id.id;
-        setBooking(booking);
-        console.log(booking);
+      .then((response) => {
+        // console.log("aaa",response.data.data.patient_name);
+        const bookings = response.data.data;
+        setBooking(bookings);
+        console.log(bookings.patient_name);
       })
-      .catch(error => {
+      .catch((error) => {
         console.log(error.response);
       });
   };
   useEffect(() => {
     getBooking();
-
   }, []);
   return (
     <View style={styles.container}>
-      {booking?.map((book) => 
       <TouchableOpacity>
         <View style={styles.infoView}>
-        {/* <Image source={{ uri: `${book.image}` }} style={styles.avatarUser}/> */}
+          {/* <Image source={{ uri: `${book.image}` }} style={styles.avatarUser}/> */}
           <Image source={avatarUser} style={styles.avatarUser} />
           <View>
-            <Text style={styles.txtNameUser}>{book.patient_name}</Text>
-            <Text style={styles.txtTimeReview}>{order}</Text>
+            <Text style={styles.txtNameUser}>OrderID:{booking.id}</Text>
+            <Text style={styles.txtTimeReview}>{booking.status}</Text>
           </View>
         </View>
         <Text style={styles.txtDesciptionReview}>{desciptionReview}</Text>
         <View style={styles.starItem}>
-          <Text style={styles.txtTimeReview}>{book.time}</Text>
+          <Text style={styles.txtTimeReview}>{booking?.date}</Text>
           {/* <StarItem rateStar={rateStar} /> */}
         </View>
       </TouchableOpacity>
-      )}
     </View>
   );
 });

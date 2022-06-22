@@ -37,7 +37,8 @@ const DOCTOR_DATA = {
   reviewer: '34',
 };
 
-const DoctorProfile = memo(({ navigation }) => {
+const DoctorProfile = memo(({ route, navigation }) => {
+  const { id } = route.params;
   const [doctorData, setDoctorData] = useState(DOCTOR_DATA);
 
   const onGoBack = useCallback(() => {
@@ -74,24 +75,25 @@ const DoctorProfile = memo(({ navigation }) => {
     });
   }, [doctorData.doctorServices]);
 
+  const [oneDoctor, setOneDoctor] = useState({});
+  console.log(oneDoctor);
 
-  const [doctor, setDoctor] = useState([]);
-
-  const getDoctorList = async () => {
-    axios.get(`https://ezheal.ai/api/ApiCommonController/doctorlist`)
-      .then(response => {
-        //console.log(response.data.data)
-        const doctor = response.data.data;
-        setDoctor(doctor);
-        console.log(doctor);
+  const getOneDoctor = async () => {
+    // console.log("amit");
+    axios
+      .get(`https://ezheal.ai/api/ApiCommonController/doctorlistbyid/${id}`)
+      .then((response) => {
+        // console.log(response.data.data.clinician_name)
+        const oneDoctors = response.data.data;
+        setOneDoctor(oneDoctors);
+        console.log(oneDoctors.clinician_name);
       })
-      .catch(error => {
+      .catch((error) => {
         console.log(error);
       });
   };
   useEffect(() => {
-    getDoctorList();
-
+    getOneDoctor();
   }, []);
 
   return (
@@ -99,15 +101,21 @@ const DoctorProfile = memo(({ navigation }) => {
       <View style={styles.headerView}>
         <View style={styles.header}>
           <View style={styles.setRow}>
-            <Text style={styles.doctorName}>{doctorData.doctorName}</Text>
+            <Text style={styles.doctorName}>{oneDoctor.clinician_name}</Text>
             <View style={styles.rateView}>
-              <Text style={styles.specialized}>{doctorData.specialized}</Text>
+              <Text style={styles.specialized}>
+                {oneDoctor.specializaition}
+              </Text>
               <SvgStar style={styles.svgStart} />
               <Text style={styles.txtRating}>{doctorData.rating}</Text>
             </View>
-            <Text style={styles.txtTitle}>{doctorData.title}</Text>
+            <Text style={styles.txtTitle}>{oneDoctor.description}</Text>
           </View>
-          <Image style={styles.imgDoctor} source={doctorData.imgDoctor} />
+          <Image
+            source={{ uri: `${oneDoctor.pimage}` }}
+            style={styles.imgDoctor}
+          />
+          {/* <Image style={styles.imgDoctor} source={doctorData.imgDoctor} /> */}
         </View>
         <View style={styles.buttonsView}>
           <ButtonPrimary
@@ -154,7 +162,6 @@ const DoctorProfile = memo(({ navigation }) => {
         title={`Reviewer (${doctorData.reviewer})`}
         onPress={onDoctorReview}
       />
-      
     </ScrollView>
   );
 });

@@ -16,6 +16,7 @@ import { getBottomSpace } from 'react-native-iphone-x-helper';
 import BookingStatus from '@screens/AppointmentStutas/BookingStatus';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DatePicker from 'react-native-datepicker';
 
 const DATA = {
   imgDoctor: require('@assets/BookAppointment/Doctor.png'),
@@ -31,16 +32,24 @@ const BookAppointment = memo(({ route, navigation }) => {
   const [bookTimeData, setBookTimeData] = useState(TIMEBOOKDATA);
   const [dateSelect, setDateSelect] = useState(dates);
   const [active, setActive] = useState(1);
-  const [oneDoctor, setOneDoctor] = useState({})
+  const [oneDoctor, setOneDoctor] = useState({});
 
+  // const [currentTime,setcurrentTime] = useState('')
+  // useEffect(() => {
+  //   var hours = new Date ().getHours()
+  //   var min = new Date ().getMinutes()
+  //   var sec = new Date ().getSeconds()
 
-  const [date, setDate] = useState(new Date());
-  const changeSelectedDate = (event, selectedDate) => {
-    const currentDate = selectedDate || date;
-    setDate(currentDate);
-  };
+  //   setcurrentTime(
+  //     hours +':' +min+ ':' +sec
+  //   )
+  // },[])
 
-
+  // const [date, setDate] = useState(new Date());
+  // const changeSelectedDate = (event, selectedDate) => {
+  //   const currentDate = selectedDate || date;
+  //   setDate(currentDate);
+  // };
 
   const onChoose = useCallback((index) => {
     setActive(index);
@@ -62,7 +71,7 @@ const BookAppointment = memo(({ route, navigation }) => {
     navigation.navigate(ROUTES.BookingStatus);
   }, [navigation]);
 
-  const onBookNow = useCallback(() => { }, []);
+  const onBookNow = useCallback(() => {}, []);
 
   const markedDay = {
     [dateSelect.dateString]: {
@@ -107,45 +116,47 @@ const BookAppointment = memo(({ route, navigation }) => {
   LocaleConfig.defaultLocale = 'en';
 
   const getOneDoctor = async () => {
-    axios.get(`https://ezheal.ai/api/ApiCommonController/doctorlistbyid/${id}`)
-      .then(response => {
+    axios
+      .get(`https://ezheal.ai/api/ApiCommonController/doctorlistbyid/${id}`)
+      .then((response) => {
         //console.log(response.data.data)
         const oneDoctor = response.data.data;
-        setOneDoctor(oneDoctor)
-        console.log('@@@@', oneDoctor)
-      }).catch(error => {
-        console.log(error)
+        setOneDoctor(oneDoctor);
+        console.log('@@@@', oneDoctor);
       })
-  }
+      .catch((error) => {
+        console.log(error);
+      });
+  };
   useEffect(() => {
-    getOneDoctor()
+    getOneDoctor();
   }, []);
 
-
-  //  const [date,setDate] = useState('');
-    const [time,setTime] = useState('');
-
-
+  const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
 
   const appointment = async () => {
-    console.log("$$$",date,time);
+    console.log('$$$', date, time);
     axios
-      .post(`https://ezheal.ai/api/ApiCommonController/doctorappointment`, {
-      date:date,
-      time:time,
-      },{
-        headers:{
-          "user_token": await AsyncStorage.getItem("user_token")
-        }
+      .post(
+        `https://ezheal.ai/api/ApiCommonController/doctorappointment`,
+        {
+          date: date,
+          time: time,
+        },
+        {
+          headers: {
+            user_token: await AsyncStorage.getItem('user_token'),
+          },
+        },
+      )
+      .then((response) => {
+        console.log('@@', response.data);
       })
-       .then(response => {
-       console.log('@@',response.data);       
-      })
-      .catch(error => {
+      .catch((error) => {
         console.log(error.response.data);
       });
   };
-
 
   return (
     <ScrollView
@@ -170,7 +181,17 @@ const BookAppointment = memo(({ route, navigation }) => {
         </TouchableOpacity>
       </View>
       <Text style={styles.doctorName}>{oneDoctor?.clinician_name}</Text>
-      <Calendar
+      <DatePicker
+        style={{ width: '100%' }}
+        date={date}
+        format="DD-MM-YYYY"
+        confirmBtnText="Confirm"
+        cancelBtnText="Cancel"
+        placeholder="Select Date"
+        value={date}
+        onDateChange={(d) => setDate(d)}
+      />
+      {/* <Calendar
         style={styles.calendarView}
         firstDay={1}
         testID="dateTimePicker"
@@ -214,15 +235,15 @@ const BookAppointment = memo(({ route, navigation }) => {
           textDisabledColor: '#C8C8C8',
           selectedDayTextColor: colors.white,
         }}
-      />
+      /> */}
       <View style={styles.timeView}>
-      <TouchableOpacity
-      value={time}
-      onChangeText={setTime}
-      activeOpacity={0.6}
-      style={styles.timetab}>
-      <Text style={styles.txtTime}>'10:00 AM'</Text>
-    </TouchableOpacity>
+        <TouchableOpacity
+          value={time}
+          onChangeText={setTime}
+          activeOpacity={0.6}
+          style={styles.timetab}>
+          <Text style={styles.txtTime}>'10:00 AM'</Text>
+        </TouchableOpacity>
         {/* {bookTimeData.map((item, index) => {
           return (
             <TimeBookItem
@@ -236,15 +257,14 @@ const BookAppointment = memo(({ route, navigation }) => {
             />
           );
         })} */}
+        {/* <Text>{currentTime}</Text> */}
       </View>
       <TouchableOpacity
         style={styles.buttonPrimary}
         onPress={() => {
           appointment(time, date);
         }}>
-        <Text style={styles.txt}>
-          Submit
-        </Text>
+        <Text style={styles.txt}>Submit</Text>
       </TouchableOpacity>
       {/* <ButtonPrimary
         style={styles.buttonPrimary}
@@ -321,14 +341,14 @@ const styles = ScaledSheet.create({
     shadowOpacity: 10,
     elevation: 10,
     borderRadius: scaleHeight(24),
-    alignSelf: 'center'
+    alignSelf: 'center',
   },
   txt: {
     fontFamily: FONTS.HIND.Bold,
     fontSize: scaleHeight(16),
     textTransform: 'uppercase',
     color: colors.white,
-    alignSelf: 'center'
+    alignSelf: 'center',
   },
   timeView: {
     flexDirection: 'row',
@@ -338,7 +358,7 @@ const styles = ScaledSheet.create({
   contentContainerStyle: {
     paddingBottom: getBottomSpace() + scaleHeight(24),
   },
-  timetab:{
+  timetab: {
     paddingHorizontal: scaleHeight(20),
     paddingTop: scaleHeight(12),
     paddingBottom: scaleHeight(10),
@@ -347,7 +367,7 @@ const styles = ScaledSheet.create({
     marginRight: scaleWidth(16),
     borderRadius: scaleWidth(8),
     width: scaleWidth(104),
-    backgroundColor:colors.blue
+    backgroundColor: colors.blue,
   },
   txtTime: {
     fontFamily: FONTS.HIND.Regular,

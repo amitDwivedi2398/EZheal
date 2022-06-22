@@ -1,5 +1,14 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, Keyboard, Platform,Image,TextInput,ToastAndroid } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Keyboard,
+  Platform,
+  Image,
+  TextInput,
+  ToastAndroid,
+} from 'react-native';
 import { ScaledSheet } from 'react-native-size-matters';
 import colors from '@ultis/colors';
 import SvgHeart from '@svgs/SignIn/SvgHeart';
@@ -25,8 +34,6 @@ const SignIn = memo(({ navigation }) => {
   const [show, setShow] = useState(true);
   const refInput1 = useRef(null);
   const refInput2 = useRef(null);
-
- 
 
   function showToast() {
     ToastAndroid.show('Wrong Email or Password', ToastAndroid.SHORT);
@@ -68,7 +75,7 @@ const SignIn = memo(({ navigation }) => {
     setShow(true);
   };
   // logIn api//
-  const _storeData = async token => {
+  const _storeData = async (token) => {
     try {
       await AsyncStorage.setItem('token', JSON.stringify(token));
       console.log('token saved success');
@@ -83,7 +90,7 @@ const SignIn = memo(({ navigation }) => {
         console.log('success');
         console.log(token);
         setStoreddata(token);
-        navigation.replace('CreatAccount',{ screen: 'CreatAccount' })
+        navigation.replace('CreatAccount', { screen: 'CreatAccount' });
       }
     } catch (e) {
       console.log('no Value in login');
@@ -93,45 +100,66 @@ const SignIn = memo(({ navigation }) => {
     getData();
   }, [storeddata]);
 
-  const postUser = () =>{
-    axios.post("https://ezheal.ai/api/ApiCommonController/patient_loginbypassword",{
-          email:email,
-          password:password
-    })
-    .then(function(response){
-      console.log(response.data);
-      console.log(response.data);
-      if (response.data.msg === 'success' || response.data.msg == 'success') {
-        ToastAndroid.show('Login Successfull....', ToastAndroid.SHORT);
-      }
-      console.log(response.data);
+  const postUser = () => {
+    axios
+      .post(
+        'https://ezheal.ai/api/ApiCommonController/patient_loginbypassword',
+        {
+          email: email,
+          password: password,
+        },
+      )
+      .then(function (response) {
+        console.log(response.data);
+        console.log(response.data);
 
-         if (response.data != null) {
-          _storeData(response.data);
-          
-          navigation.replace('MainBottomTab',{ screen: 'MainPage' })
-        } else {
-          console.log('no data!');  
+        //Check for the Email TextInput
+        if (!email.trim()) {
+          alert('Please Enter Email');
+          return;
         }
-    })
-    .catch(function(error){
-      console.log("error",error);
-      if (
-        error.response.data.msg == 'User Doesnot Exist' ||
-        error.response.data.msg === 'User Doesnot Exist'
-      ) {
-        showToast();
-      }
-    });
+        //Check for the Name TextInput
+        if (!password.trim()) {
+          alert('Please Enter Password');
+          return;
+        }
+        //Checked Successfully
+        //Do whatever you want
+        alert('Success');
+
+        if (response.data.msg === 'success' || response.data.msg == 'success') {
+          ToastAndroid.show('Login Successfull....', ToastAndroid.SHORT);
+        }
+        console.log(response.data);
+
+        if (response.data != null) {
+          _storeData(response.data);
+
+          navigation.replace('MainBottomTab', { screen: 'MainPage' });
+        } else {
+          console.log('no data!');
+        }
+      })
+      .catch(function (error) {
+        console.log('error', error);
+        if (
+          error.response.data.msg == 'User Doesnot Exist' ||
+          error.response.data.msg === 'User Doesnot Exist'
+        ) {
+          showToast();
+        }
+      });
   };
-  
 
   return (
     <View style={styles.container}>
       <KeyboardAwareScrollView
         showsVerticalScrollIndicator={false}
         bounces={false}>
-          <Image style={styles.svgHeart} source={require('../../assets/logo/ezheal_icon.png')} />
+        <Image
+          style={styles.svgHeart}
+          source={require('../../assets/logo/ezheal_icon.png')}
+        />
         {/* <SvgHeart style={styles.svgHeart} /> */}
         <Text style={styles.txtWelcome}>Welcome to EZscan</Text>
         {/* <TextInputHealer
@@ -146,15 +174,15 @@ const SignIn = memo(({ navigation }) => {
           blurOnSubmit={false}
         /> */}
         <TextInput
-        inputRef={refInput1}
-        style={styles.txtInput2}
-        svg={<SvgUser />}
-        placeholder={'Email'}
-        value={email} 
-        blurOnSubmit={false}
-        onChangeText={setEmail}
+          inputRef={refInput1}
+          style={styles.txtInput2}
+          svg={<SvgUser />}
+          placeholder={'Email'}
+          value={email}
+          blurOnSubmit={false}
+          onChangeText={(value) => setEmail(value)}
         />
-         
+
         {/* <TextInputHealer
           inputRef={refInput2}
           style={styles.txtInput2}
@@ -163,32 +191,30 @@ const SignIn = memo(({ navigation }) => {
           secure={true}
           value={password}
         /> */}
-        <TextInput 
-        inputRef={refInput2}
-        style={styles.txtInput2}
-        svg={<SvgLock />}
-        placeholder={'Password'}
-        secure={true}
-        value={password}
-        onChangeText={setPassword}
+        <TextInput
+          inputRef={refInput2}
+          style={styles.txtInput2}
+          svg={<SvgLock />}
+          placeholder={'Password'}
+          secure={true}
+          value={password}
+          onChangeText={(value) => setPassword(value)}
         />
-        
+
         <View style={styles.signInView}>
-        <TouchableOpacity
+          <TouchableOpacity
             style={styles.signIn}
             onPress={() => {
               postUser(email, password);
             }}>
-            <Text style={styles.txt}>
-              Submit
-            </Text>
+            <Text style={styles.txt}>Submit</Text>
           </TouchableOpacity>
           <View>
-          {/* <Text>
+            {/* <Text>
             {storeddata}
             <storeddata />
           </Text> */}
-        </View>
+          </View>
           {/* <ButtonPrimary
             onPress={postUser}
             style={styles.signIn}
@@ -236,8 +262,8 @@ const styles = ScaledSheet.create({
     backgroundColor: colors.white,
   },
   svgHeart: {
-    width:scaleWidth(50),
-    height:scaleHeight(50),
+    width: scaleWidth(50),
+    height: scaleHeight(50),
     top:
       Platform.OS === 'ios'
         ? getStatusBarHeight() + scaleHeight(32)
@@ -282,9 +308,9 @@ const styles = ScaledSheet.create({
     justifyContent: 'center',
     shadowOpacity: 10,
     elevation: 10,
-    borderRadius:scaleHeight(24) ,
+    borderRadius: scaleHeight(24),
   },
-  txt:{
+  txt: {
     fontFamily: FONTS.HIND.Bold,
     fontSize: scaleHeight(16),
     textTransform: 'uppercase',

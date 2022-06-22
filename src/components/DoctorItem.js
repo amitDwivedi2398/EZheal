@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -17,6 +17,9 @@ import ButtonPrimary from '@components/ButtonPrimary';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import SvgDelete from '@svgs/SvgDelete';
 import axios from 'axios';
+import { navigationRef } from '@navigation/NavigationService';
+import ROUTES from '@ultis/routes';
+import { useNavigation } from '@react-navigation/native';
 
 interface PropsDoctorItem {
   style?: ViewStyle;
@@ -34,6 +37,7 @@ interface PropsDoctorItem {
 }
 
 const DoctorItem = (props: PropsDoctorItem) => {
+  const navigation = useNavigation();
   const {
     style,
     imgDoctor,
@@ -77,20 +81,20 @@ const DoctorItem = (props: PropsDoctorItem) => {
   const [doctor, setDoctor] = useState([]);
 
   const getDoctors = async () => {
-    axios.get(`https://ezheal.ai/api/ApiCommonController/getdoctorrequest`)
-      .then(response => {
+    axios
+      .get(`https://ezheal.ai/api/ApiCommonController/doctorlist`)
+      .then((response) => {
         //console.log(response.data.data)
         const doctor = response.data.data;
         setDoctor(doctor);
         console.log(doctor);
       })
-      .catch(error => {
+      .catch((error) => {
         console.log(error);
       });
   };
   useEffect(() => {
     getDoctors();
-
   }, []);
 
   return (
@@ -98,44 +102,44 @@ const DoctorItem = (props: PropsDoctorItem) => {
       friction={2}
       rightThreshold={40}
       renderRightActions={activeRemove ? renderRightActions : null}>
-        {doctor?.map((doc) => (
-      <TouchableOpacity
-        onPress={onPress}
-        activeOpacity={0.6}
-        style={[styles.doctorItem, style]}>
-        {/* <Image style={styles.imgDoctor} source={imgDoctor} /> */}
-        <Image source={{ uri: `${doc.image}` }} style={styles.imgDoctor}/>
-        <View style={styles.rateView}>
-          <Text style={styles.txtDoctorName}>{doc.name}</Text>
-          <View style={styles.setRow}>
-            <SvgStar style={styles.svgStart} />
-            <Text style={styles.txtRating}>{rating}</Text>
-          </View>
-        </View>
-        <Text style={styles.txtSpecialized}>{doc.specialztion}</Text>
+      {doctor?.map((doc) => (
         <TouchableOpacity
-          onPress={onLocation}
+          onPress={() => navigation.navigate('DoctorProfile', { id: doc.id })}
           activeOpacity={0.6}
-          style={styles.locationView}>
-          <SvgLocation color={colors.dimGray} />
-          <Text style={styles.txtLocation}> {location}</Text>
+          style={[styles.doctorItem, style]}>
+          {/* <Image style={styles.imgDoctor} source={imgDoctor} /> */}
+          <Image source={{ uri: `${doc.pimage}` }} style={styles.imgDoctor} />
+          <View style={styles.rateView}>
+            <Text style={styles.txtDoctorName}>{doc.clinician_name}</Text>
+            <View style={styles.setRow}>
+              <SvgStar style={styles.svgStart} />
+              <Text style={styles.txtRating}>{rating}</Text>
+            </View>
+          </View>
+          <Text style={styles.txtSpecialized}>{doc.specialztion}</Text>
+          <TouchableOpacity
+            onPress={onLocation}
+            activeOpacity={0.6}
+            style={styles.locationView}>
+            <SvgLocation color={colors.dimGray} />
+            <Text style={styles.txtLocation}> {location}</Text>
+          </TouchableOpacity>
+          <View style={styles.btnView}>
+            <ButtonPrimary
+              style={styles.btnCall}
+              title={'Call'}
+              titleStyle={styles.txtBtnCall}
+              onPress={onCall}
+            />
+            <ButtonPrimary
+              style={styles.btnMessage}
+              titleStyle={styles.txtBtnMessage}
+              title={'Message'}
+              onPress={onMessage}
+            />
+          </View>
         </TouchableOpacity>
-        <View style={styles.btnView}>
-          <ButtonPrimary
-            style={styles.btnCall}
-            title={'Call'}
-            titleStyle={styles.txtBtnCall}
-            onPress={onCall}
-          />
-          <ButtonPrimary
-            style={styles.btnMessage}
-            titleStyle={styles.txtBtnMessage}
-            title={'Message'}
-            onPress={onMessage}
-          />
-        </View>
-      </TouchableOpacity>
-        ))}
+      ))}
     </Swipeable>
   );
 };

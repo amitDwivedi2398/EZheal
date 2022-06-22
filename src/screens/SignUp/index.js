@@ -1,5 +1,12 @@
 import React, { memo, useState, useCallback } from 'react';
-import { View, Text, Platform,Image,TextInput } from 'react-native';
+import {
+  View,
+  Text,
+  Platform,
+  Image,
+  TextInput,
+  ActivityIndicator,
+} from 'react-native';
 import { ScaledSheet } from 'react-native-size-matters';
 import colors from '@ultis/colors';
 import { getHeightByPercent, scaleHeight, scaleWidth } from '@ultis/size';
@@ -28,7 +35,7 @@ const SignUp = memo(({ navigation }) => {
   const [password, setPassword] = useState('');
   const [repassword, setRepassword] = useState('');
 
-  const _storeData = async token => {
+  const _storeData = async (token) => {
     try {
       await AsyncStorage.setItem('user_token', JSON.stringify(token));
       console.log('user_id saved success');
@@ -37,7 +44,7 @@ const SignUp = memo(({ navigation }) => {
     }
   };
   const register = () => {
-    console.log(name,mobile_no, email, password, repassword);
+    console.log(name, mobile_no, email, password, repassword);
     axios
       .post(`https://ezheal.ai/api/ApiCommonController/userRegister`, {
         name: name,
@@ -46,9 +53,36 @@ const SignUp = memo(({ navigation }) => {
         password: password,
         repassword: repassword,
       })
-       .then(function(response) {
-       console.log('@@',response.data.data.token);
-       console.log('$$',response.data.data);
+      .then(function (response) {
+        console.log('@@', response.data.data.token);
+        console.log('$$', response.data.data);
+
+        //Check for the name TextInput
+        if (!name.trim()) {
+          alert('Please Enter name');
+          return;
+        }
+        //Check for the mobile_no TextInput
+        if (!mobile_no.trim()) {
+          alert('Please Enter Mobile Number');
+          return;
+        }
+        //Check for the email TextInput
+        if (!email.trim()) {
+          alert('Please Enter email');
+          return;
+        }
+        if (!password.trim()) {
+          alert('Please Enter Password');
+          return;
+        }
+        if (!repassword.trim()) {
+          alert('Please Enter Re-Password');
+          return;
+        }
+        //Checked Successfully
+        //Do whatever you want
+        alert('Success');
         // if (response.data.msg === 'success' || response.data.msg == 'success') {
         //   ToastAndroid.show('Register Successfull....', ToastAndroid.SHORT);
         // }
@@ -56,7 +90,7 @@ const SignUp = memo(({ navigation }) => {
 
         if (response.data.data.token != null) {
           _storeData(response.data.data.token);
-          navigation.navigate('CreatAccount',{ screen: 'CreatAccount' })
+          navigation.replace('CreatAccount', { screen: 'CreatAccount' });
         } else {
           console.log('no data!');
         }
@@ -65,8 +99,6 @@ const SignUp = memo(({ navigation }) => {
         console.log(error);
       });
   };
-
- 
 
   const onCreateAccount = useCallback(() => {
     navigation.navigate(ROUTES.CreatAccount);
@@ -91,7 +123,10 @@ const SignUp = memo(({ navigation }) => {
         showsVerticalScrollIndicator={false}
         scrollEventThrottle={16}>
         {/* <SvgSmallHeart style={styles.svgHeart} color={colors.white} /> */}
-        <Image style={styles.svgHeart} source={require('../../assets/logo/ezheal_icon.png')} />
+        <Image
+          style={styles.svgHeart}
+          source={require('../../assets/logo/ezheal_icon.png')}
+        />
         <SvgSignUp style={styles.svg} />
         <View style={[styles.contentView]}>
           <Text style={styles.txtJoin}>Join to EZscan!</Text>
@@ -104,12 +139,12 @@ const SignUp = memo(({ navigation }) => {
             onChangeText={setName}
           /> */}
           <TextInput
-           style={styles.txtInput1}
-           placeholder={'Username'}
-           value={name}
-           onChangeText={setName}
-           placeholderTextColor={colors.dimGray}
-           />
+            style={styles.txtInput1}
+            placeholder={'Username'}
+            value={name}
+            onChangeText={(value) => setName(value)}
+            placeholderTextColor={colors.dimGray}
+          />
           {/* <TextInputHealer
             style={styles.txtInput1}
             svg={<SvgUser />}
@@ -118,13 +153,13 @@ const SignUp = memo(({ navigation }) => {
             onChangeText={setMobile}
           /> */}
           <TextInput
-          style={styles.txtInput1}
-          svg={<SvgUser />}
-          placeholder={'Mobile'}
-          value={mobile_no}
-          onChangeText={setMobile}
-          placeholderTextColor={colors.dimGray}
-           />
+            style={styles.txtInput1}
+            svg={<SvgUser />}
+            placeholder={'Mobile'}
+            value={mobile_no}
+            onChangeText={setMobile}
+            placeholderTextColor={colors.dimGray}
+          />
 
           {/* <TextInputHealer
             style={styles.txtInput2}
@@ -133,8 +168,8 @@ const SignUp = memo(({ navigation }) => {
             value={email}
             onChangeText={setEmail}
           /> */}
-          <TextInput 
-          style={styles.txtInput1}
+          <TextInput
+            style={styles.txtInput1}
             svg={<SvgEmail />}
             placeholder={'Email'}
             value={email}
@@ -149,14 +184,14 @@ const SignUp = memo(({ navigation }) => {
             value={password}
             onChangeText={setPassword}
           /> */}
-          <TextInput 
-           style={styles.txtInput1}
-           svg={<SvgLock />}
-           placeholder={'Password'}
-           secure={true}
-           value={password}
-           onChangeText={setPassword}
-           placeholderTextColor={colors.dimGray}
+          <TextInput
+            style={styles.txtInput1}
+            svg={<SvgLock />}
+            placeholder={'Password'}
+            secure={true}
+            value={password}
+            onChangeText={setPassword}
+            placeholderTextColor={colors.dimGray}
           />
           {/* <TextInputHealer
             style={styles.txtInput2}
@@ -166,29 +201,30 @@ const SignUp = memo(({ navigation }) => {
             value={repassword}
             onChangeText={setRepassword}
           /> */}
-          <TextInput 
-           style={styles.txtInput1}
-           svg={<SvgLock />}
-           placeholder={'Re-Password'}
-           placeholderTextColor={colors.dimGray}
-           secure={true}
-           value={repassword}
-           onChangeText={setRepassword}/>
+          <TextInput
+            style={styles.txtInput1}
+            svg={<SvgLock />}
+            placeholder={'Re-Password'}
+            placeholderTextColor={colors.dimGray}
+            secure={true}
+            value={repassword}
+            onChangeText={setRepassword}
+          />
 
           <ButtonPrimary
-          onPress={register}
+            onPress={register}
             style={styles.signUp}
             title={'Sign Up'}
           />
-          
+
           <View style={styles.lineView}>
             <SvgLine />
             <Text style={styles.txtOr}>or</Text>
             <SvgLine />
           </View>
-          <Text 
-          // onPress={onSignIn} 
-          style={styles.signIn}>
+          <Text
+            // onPress={onSignIn}
+            style={styles.signIn}>
             Sign In
           </Text>
           <View style={styles.bottomView}>
@@ -217,8 +253,8 @@ const styles = ScaledSheet.create({
     backgroundColor: colors.white,
   },
   svgHeart: {
-    width:scaleWidth(50),
-    height:scaleHeight(50),
+    width: scaleWidth(50),
+    height: scaleHeight(50),
     top:
       Platform.OS === 'ios'
         ? getStatusBarHeight() + scaleHeight(14)

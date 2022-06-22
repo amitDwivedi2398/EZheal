@@ -1,10 +1,11 @@
-import React, { memo } from 'react';
+import React, { memo, useCallback, useState, useEffect } from 'react';
 import { View, Text } from 'react-native';
 import { ScaledSheet } from 'react-native-size-matters';
 import colors from '@ultis/colors';
 import { scaleHeight, scaleWidth } from '@ultis/size';
 import FONTS from '@ultis/fonts';
 import SvgLocation from '@svgs/SvgLocation';
+import axios from 'axios';
 
 interface Props {
   nameLocation?: string;
@@ -15,10 +16,31 @@ interface Props {
 const DoctorAddressItem = memo((props: Props) => {
   const { nameLocation, address, distance } = props;
 
+  const [oneDoctor, setOneDoctor] = useState({});
+  console.log(oneDoctor);
+
+  const getOneDoctor = async () => {
+    // console.log("amit");
+    axios
+      .get(`https://ezheal.ai/api/ApiCommonController/doctorlistbyid/9`)
+      .then((response) => {
+        // console.log(response.data.data.clinician_name)
+        const oneDoctors = response.data.data;
+        setOneDoctor(oneDoctors);
+        console.log(oneDoctors.clinician_name);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+  useEffect(() => {
+    getOneDoctor();
+  }, []);
+
   return (
     <View style={styles.container}>
       <Text style={styles.txtLoction}>{nameLocation}</Text>
-      <Text style={styles.txtAddress}>{address}</Text>
+      <Text style={styles.txtAddress}>{oneDoctor.address}</Text>
       <View style={styles.distanceView}>
         <SvgLocation color={colors.classicBlue} />
         <Text style={styles.txtDistance}> {distance}</Text>
